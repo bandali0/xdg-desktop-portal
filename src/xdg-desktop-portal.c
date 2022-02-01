@@ -60,6 +60,7 @@
 #include "wallpaper.h"
 #include "realtime.h"
 #include "dynamic-launcher.h"
+#include "web-extensions.h"
 
 static GMainLoop *loop = NULL;
 
@@ -246,6 +247,7 @@ on_bus_acquired (GDBusConnection *connection,
   export_portal_implementation (connection, trash_create (connection));
   export_portal_implementation (connection, game_mode_create (connection));
   export_portal_implementation (connection, realtime_create (connection));
+  export_portal_implementation (connection, web_extensions_create (connection));
 
   impls = find_all_portal_implementations ("org.freedesktop.impl.portal.Settings");
   export_portal_implementation (connection, settings_create (connection, impls));
