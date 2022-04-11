@@ -396,7 +396,7 @@ close_session_finish (GAsyncResult *result, GError **error)
 
 static int got_info = 0;
 
-extern XdpDbusImplPermissionStore *permission_store;
+extern XdpImplPermissionStore *permission_store;
 
 static void
 set_web_extensions_permissions (const char *permission)
@@ -405,7 +405,7 @@ set_web_extensions_permissions (const char *permission)
   g_autoptr(GError) error = NULL;
 
   permissions[0] = permission;
-  xdp_dbus_impl_permission_store_call_set_permission_sync (permission_store,
+  xdp_impl_permission_store_call_set_permission_sync (permission_store,
                                                            "webextensions",
                                                            TRUE,
                                                            "org.example.testing",

@@ -40,22 +40,22 @@ typedef struct _WebExtensionsClass WebExtensionsClass;
 
 struct _WebExtensions
 {
-  XdpDbusWebExtensionsSkeleton parent_instance;
+  XdpWebExtensionsSkeleton parent_instance;
 };
 
 struct _WebExtensionsClass
 {
-  XdpDbusWebExtensionsSkeletonClass parent_class;
+  XdpWebExtensionsSkeletonClass parent_class;
 };
 
-static XdpDbusImplAccess *access_impl;
+static XdpImplAccess *access_impl;
 static WebExtensions *web_extensions;
 
 GType web_extensions_get_type (void);
-static void web_extensions_iface_init (XdpDbusWebExtensionsIface *iface);
+static void web_extensions_iface_init (XdpWebExtensionsIface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (WebExtensions, web_extensions, XDP_DBUS_TYPE_WEB_EXTENSIONS_SKELETON,
-                         G_IMPLEMENT_INTERFACE (XDP_DBUS_TYPE_WEB_EXTENSIONS,
+G_DEFINE_TYPE_WITH_CODE (WebExtensions, web_extensions, XDP_TYPE_WEB_EXTENSIONS_SKELETON,
+                         G_IMPLEMENT_INTERFACE (XDP_TYPE_WEB_EXTENSIONS,
                                                 web_extensions_iface_init));
 
 typedef enum _WebExtensionsSessionMode
@@ -214,7 +214,7 @@ web_extensions_session_new (GVariant *options,
 }
 
 static gboolean
-handle_create_session (XdpDbusWebExtensions *object,
+handle_create_session (XdpWebExtensions *object,
                        GDBusMethodInvocation *invocation,
                        GVariant *arg_options)
 {
@@ -237,7 +237,7 @@ handle_create_session (XdpDbusWebExtensions *object,
     }
   session_register (session);
 
-  xdp_dbus_web_extensions_complete_create_session (object, invocation, session->id);
+  xdp_web_extensions_complete_create_session (object, invocation, session->id);
 
   return TRUE;
 }
@@ -434,7 +434,7 @@ find_messaging_host (WebExtensionsSessionMode mode,
 }
 
 static gboolean
-handle_get_manifest (XdpDbusWebExtensions *object,
+handle_get_manifest (XdpWebExtensions *object,
                      GDBusMethodInvocation *invocation,
                      const char *arg_session_handle,
                      const char *arg_name,
@@ -478,7 +478,7 @@ handle_get_manifest (XdpDbusWebExtensions *object,
       return TRUE;
     }
 
-  xdp_dbus_web_extensions_complete_get_manifest (object, invocation, json_manifest);
+  xdp_web_extensions_complete_get_manifest (object, invocation, json_manifest);
   return TRUE;
 }
 
@@ -556,7 +556,7 @@ handle_start_in_thread (GTask *task,
       g_variant_builder_init (&opt_builder, G_VARIANT_TYPE_VARDICT);
       g_variant_builder_add (&opt_builder, "{sv}", "deny_label", g_variant_new_string (_("Don't allow")));
       g_variant_builder_add (&opt_builder, "{sv}", "grant_label", g_variant_new_string (_("Allow")));
-      if (!xdp_dbus_impl_access_call_access_dialog_sync (access_impl,
+      if (!xdp_impl_access_call_access_dialog_sync (access_impl,
                                                          request->id,
                                                          app_info_id ? app_info_id : app_id,
                                                          "",
@@ -632,7 +632,7 @@ out:
       GVariantBuilder results;
 
       g_variant_builder_init (&results, G_VARIANT_TYPE_VARDICT);
-      xdp_dbus_request_emit_response (XDP_DBUS_REQUEST (request), response, g_variant_builder_end (&results));
+      xdp_request_emit_response (XDP_REQUEST (request), response, g_variant_builder_end (&results));
       request_unexport (request);
     }
 
@@ -641,7 +641,7 @@ out:
 }
 
 static gboolean
-handle_start (XdpDbusWebExtensions *object,
+handle_start (XdpWebExtensions *object,
               GDBusMethodInvocation *invocation,
               const char *arg_session_handle,
               const char *arg_name,
@@ -683,7 +683,7 @@ handle_start (XdpDbusWebExtensions *object,
   g_object_set_data_full (G_OBJECT (request), "extension-or-origin", g_strdup (arg_extension_or_origin), g_free);
 
   request_export (request, g_dbus_method_invocation_get_connection (invocation));
-  xdp_dbus_web_extensions_complete_start (object, invocation, request->id);
+  xdp_web_extensions_complete_start (object, invocation, request->id);
 
   task = g_task_new (object, NULL, NULL, NULL);
   g_task_set_task_data (task, g_object_ref (request), g_object_unref);
@@ -694,7 +694,7 @@ handle_start (XdpDbusWebExtensions *object,
 
 
 static gboolean
-handle_get_pipes (XdpDbusWebExtensions *object,
+handle_get_pipes (XdpWebExtensions *object,
                   GDBusMethodInvocation *invocation,
                   GUnixFDList *fd_list,
                   const char *arg_session_handle,
@@ -748,7 +748,7 @@ handle_get_pipes (XdpDbusWebExtensions *object,
   web_extensions_session->standard_output = -1;
   web_extensions_session->standard_error = -1;
 
-  xdp_dbus_web_extensions_complete_get_pipes (object, invocation, out_fd_list,
+  xdp_web_extensions_complete_get_pipes (object, invocation, out_fd_list,
                                               g_variant_new_handle (0),
                                               g_variant_new_handle (1),
                                               g_variant_new_handle (2));
@@ -756,7 +756,7 @@ handle_get_pipes (XdpDbusWebExtensions *object,
 }
 
 static void
-web_extensions_iface_init (XdpDbusWebExtensionsIface *iface)
+web_extensions_iface_init (XdpWebExtensionsIface *iface)
 {
   iface->handle_create_session = handle_create_session;
   iface->handle_get_manifest = handle_get_manifest;
@@ -767,7 +767,7 @@ web_extensions_iface_init (XdpDbusWebExtensionsIface *iface)
 static void
 web_extensions_init (WebExtensions *web_extensions)
 {
-  xdp_dbus_web_extensions_set_version (XDP_DBUS_WEB_EXTENSIONS (web_extensions), 1);
+  xdp_web_extensions_set_version (XDP_WEB_EXTENSIONS (web_extensions), 1);
 }
 
 static void
@@ -783,7 +783,7 @@ web_extensions_create (GDBusConnection *connection,
 
   web_extensions = g_object_new (web_extensions_get_type (), NULL);
 
-  access_impl = xdp_dbus_impl_access_proxy_new_sync (connection,
+  access_impl = xdp_impl_access_proxy_new_sync (connection,
                                                      G_DBUS_PROXY_FLAGS_NONE,
                                                      dbus_name_access,
                                                      DESKTOP_PORTAL_OBJECT_PATH,
