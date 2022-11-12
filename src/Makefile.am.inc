@@ -181,7 +181,9 @@ xdg_desktop_portal_CFLAGS = \
 	$(NULL)
 xdg_desktop_portal_CPPFLAGS = \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\"        \
+	-DLIBDIR=\"$(libdir)\"				\
 	-DLOCALEDIR=\"$(localedir)\"			\
+	-DSYSCONFDIR=\"$(sysconfdir)\"			\
 	$(NULL)
 
 xdg_desktop_portal_validate_icon_SOURCES = src/validate-icon.c
