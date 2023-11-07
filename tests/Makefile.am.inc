@@ -86,6 +86,7 @@ nodist_test_portals_SOURCES = \
 		tests/utils.h \
 	$(NULL)
 test_programs += test-portals
+EXTRA_test_portals_DEPENDENCIES = tests/native-messaging-hosts/org.example.testing.json tests/native-messaging-hosts/server.sh
 
 test_permission_store_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(SYSTEMD_CFLAGS)
 test_permission_store_LDADD = \
@@ -123,11 +124,17 @@ tests/services/org.freedesktop.impl.portal.PermissionStore.service: document-por
 	mkdir -p tests/services
 	$(AM_V_GEN) $(SED) -e "s|\@libexecdir\@|$(abs_top_builddir)|" $< > $@
 
+tests/native-messaging-hosts/org.example.testing.json: tests/native-messaging-hosts/org.example.testing.json.in
+	$(AM_V_GEN) $(SED) -e "s|\@server_path\@|$(abs_top_builddir)/tests/native-messaging-hosts/server.sh|" $< > $@
+
 install-test-data-hook:
 if ENABLE_INSTALLED_TESTS
 	mkdir -p $(DESTDIR)$(installed_testdir)/services
 	ln -sf $(dbus_servicedir)/org.freedesktop.portal.Documents.service $(DESTDIR)$(installed_testdir)/services/
 	ln -sf $(dbus_servicedir)/org.freedesktop.impl.portal.PermissionStore.service $(DESTDIR)$(installed_testdir)/services/
+	mkdir -p $(DESTDIR)$(installed_testdir)/native-messaging-hosts
+	cp -p $(abs_top_builddir)/tests/native-messaging-hosts/server.sh $(DESTDIR)$(installed_testdir)/native-messaging-hosts/
+	$(SED) -e "s|$(abs_top_builddir)/tests|$(DESTDIR)$(installed_testdir)|" tests/native-messaging-hosts/org.example.testing.json > $(DESTDIR)$(installed_testdir)/native-messaging-hosts/org.example.testing.json
 endif
 
 installed_test_dbsdir = $(installed_testdir)/dbs
@@ -137,7 +144,7 @@ installed_test_native_messaging_hostsdir = $(installed_testdir)/native-messaging
 if ENABLE_INSTALLED_TESTS
 dist_installed_test_dbs_DATA = tests/dbs/no_tables
 dist_installed_test_portals_DATA = tests/portals/test.portal
-dist_installed_test_native_messaging_hosts_DATA = tests/native-messaging-hosts/org.example.testing.json
+dist_installed_test_native_messaging_hosts_DATA = tests/native-messaging-hosts/org.example.testing.json tests/native-messaging-hosts/server.sh
 endif
 
 dist_installed_test_DATA = \
@@ -166,6 +173,8 @@ test_programs += \
 DISTCLEANFILES += \
 	tests/services/org.freedesktop.portal.Documents.service \
 	tests/services/org.freedesktop.impl.portal.PermissionStore.service \
+	tests/native-messaging-hosts/org.example.testing.json \
+	tests/native-messaging-hosts/server.sh \
         session.conf \
         dbus-session-bus-address \
         dbus-session-bus-pid \
