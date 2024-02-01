@@ -1,11 +1,12 @@
 #include <config.h>
 
-#include "web-extensions.h"
-#include "xdp-utils.h"
-
 #include <gio/gio.h>
 #include <gio/gunixfdlist.h>
-#include "xdp-impl-dbus.h"
+
+#include "src/xdp-utils.h"
+#include "src/xdp-impl-dbus.h"
+
+#include "web-extensions.h"
 
 // TODO: convert these simple client wrappers to proper libportal APIs
 
